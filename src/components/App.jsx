@@ -10,7 +10,7 @@ import Notification from './Notification/Notification';
 export default function App() {
   const [ratings, setRatings] = useState(() => {
     const savedFeedback = window.localStorage.getItem('feedback');
-    return savedFeedback !== 0
+    return savedFeedback !== null
       ? JSON.parse(savedFeedback)
       : {
           good: 0,

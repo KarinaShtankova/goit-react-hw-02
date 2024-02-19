@@ -1,27 +1,65 @@
-// src/components/App.jsx
+import css from './App.module.css';
+import { useState } from 'react';
+import { useEffect } from 'react';
 
-import { Alert } from './Alert';
-import { Product } from './Product';
-
+import Description from './Description/Description';
+import Options from './Options/Options';
+import Feedback from './Feedback/Feedback';
+import Notification from './Notification/Notification';
 
 export default function App() {
-  return (
-    <div>
-      <h1>Best selling</h1>
+  const [ratings, setRatings] = useState(() => {
+    const savedFeedback = window.localStorage.getItem('feedback');
+    return savedFeedback !== 0
+      ? JSON.parse(savedFeedback)
+      : {
+          good: 0,
+          neutral: 0,
+          bad: 0,
+        };
+  });
 
-      <Product
-        name="Tacos With Lime"
-        price={10.99}
+  const totalFeedback = ratings.good + ratings.neutral + ratings.bad;
+  const positiveFeedback = Math.round(
+    ((ratings.good + ratings.neutral) / totalFeedback) * 100
+  );
+
+  useEffect(() => {
+    window.localStorage.setItem('feedback', JSON.stringify(ratings));
+  }, [ratings]);
+
+  const updateFeedback = feedbackType => {
+    setRatings({
+      ...ratings,
+      [feedbackType]: ratings[feedbackType] + 1,
+    });
+  };
+
+  const resetFeedback = () => {
+    setRatings({
+      good: 0,
+      neutral: 0,
+      bad: 0,
+    });
+  };
+
+  return (
+    <div className={css.container}>
+      <Description />
+      <Options
+        updateFeedback={updateFeedback}
+        resetFeedback={resetFeedback}
+        totalFeedback={totalFeedback}
       />
-      <Product
-        name="Fries and Burger"
-        imgUrl="<https://images.pexels.com/photos/70497/pexels-photo-70497.jpeg?dpr=2&h=480&w=640>"
-        price={14.29}
-      />
-      <Alert/>
+      {totalFeedback === 0 ? (
+        <Notification />
+      ) : (
+        <Feedback
+          values={ratings}
+          totalValue={totalFeedback}
+          positiveValue={positiveFeedback}
+        />
+      )}
     </div>
   );
 }
-
-
-
